@@ -248,3 +248,19 @@ INSERT INTO reserva(cliente_id,quarto_id,data_inicio,data_fim,preco)
 -- Servico_reserva
 
 INSERT INTO servico_reserva(servico_id,reserva_id,quantidade) VALUES(2,1,3);
+
+
+-- Mostrar Dados
+
+SELECT * FROM endereco;
+SELECT * FROM hotel;
+SELECT * FROM cliente;
+SELECT * FROM quarto;
+SELECT * FROM servico;
+SELECT * FROM reserva;
+SELECT * FROM servico_reserva;
+
+
+-- Mostrar Sequencias
+
+SELECT * FROM user_sequences;
