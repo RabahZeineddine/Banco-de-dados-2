@@ -1,6 +1,17 @@
 -- Tables 
 
-REATE TABLE endereco (
+DROP TABLE endereco cascade constraint;
+DROP TABLE HOTEL cascade constraint;
+DROP TABLE cliente cascade constraint;
+DROP TABLE quarto cascade constraint;
+DROP TABLE servico cascade constraint;
+DROP TABLE reserva cascade constraint;
+DROP TABLE servico_reserva cascade constraint;
+DROP TABLE cliente_removido cascade constraint;
+DROP TABLE reserva_removida cascade constraint;
+DROP TABLE reserva_alterada cascade constraint;
+
+CREATE TABLE endereco (
     id_endereco integer,
     bairo varchar(20),
     rua varchar(20),
