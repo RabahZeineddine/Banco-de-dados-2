@@ -1,4 +1,4 @@
--- Tables 
+-- TABELAS 
 
 DROP TABLE endereco cascade constraint;
 DROP TABLE HOTEL cascade constraint;
@@ -123,7 +123,7 @@ CREATE TABLE reserva_alterada (
 );
 
 
--- SEQUENCES
+-- SQUENCIAS
 
 DROP SEQUENCE seq_endereco;
 DROP SEQUENCE seq_hotel;
@@ -209,3 +209,42 @@ BEGIN
 END;
 
 
+-- INSERIR DADOS
+
+
+-- Enderecos
+
+INSERT INTO endereco(rua,bairo,cidade,complimento,numero) VALUES('Rua De Consolação','Consolação','São Paulo',null,930);
+INSERT INTO endereco(rua,bairo,cidade,complimento,numero) VALUES('Rua Maria Antonio','Consolação','São Paulo',null,123);
+INSERT INTO endereco(rua,bairo,cidade,complimento,numero) VALUES('Rua Benedito','Jardim Guapira','São Paulo','Casa',154);
+
+-- Hoteis
+
+INSERT INTO hotel(nome,telefone,endereco_id) VALUES('Mackenzie','(11) 12345-1234',1);
+
+-- Clientes
+
+INSERT INTO cliente(nome,telefone,email,endereco_id,rg) VALUES('Joao Pedro','(11) 12312-1232','joao@hotmail.com',3,'12.123.123-1');
+INSERT INTO cliente(nome,telefone,email,endereco_id,rg) VALUES('Carol Mendes','(11) 12312-1232','carol@hotmail.com',2,'32.142.412-2');
+
+-- Quartos 
+
+INSERT INTO quarto(numero,hotel_id,disponivel) VALUES(101,1,1);
+INSERT INTO quarto(numero,hotel_id,disponivel) VALUES(201,1,0);
+INSERT INTO quarto(numero,hotel_id,disponivel) VALUES(301,1,0);
+INSERT INTO quarto(numero,hotel_id,disponivel) VALUES(401,1,0);
+
+-- Serviços
+
+INSERT INTO servico(tipo,preco) VALUES('Limpesa',20);
+INSERT INTO servico(tipo,preco) VALUES('Almoço',100);
+INSERT INTO servico(tipo,preco) VALUES('Janta',150);
+
+-- Reservas
+
+INSERT INTO reserva(cliente_id,quarto_id,data_inicio,data_fim,preco)
+    VALUES(1,1,TO_DATE('2017/11/03', 'yyyy/mm/dd'),TO_DATE('2017/11/06', 'yyyy/mm/dd'),320);
+
+-- Servico_reserva
+
+INSERT INTO servico_reserva(servico_id,reserva_id,quantidade) VALUES(2,1,3);
