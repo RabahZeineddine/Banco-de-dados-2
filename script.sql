@@ -298,3 +298,35 @@ END aumenta_preco_reservas;
 -- Aumentar 20 % o peço das reservas do Hotel Mackenzie que tem contratado o serviço limpesa.
 
 execute aumenta_preco_reservas ('Mackenzie','Limpesa',20);
+
+
+-- ETAPA 3 
+
+-- Funcao para retornar o preco total dos servicos contratados
+
+DROP FUNCTION total_servicos;
+
+CREATE OR REPLACE FUNCTION total_servicos
+(
+    reservaID IN INTEGER,
+    servicoNome IN VARCHAR
+)
+RETURN FLOAT
+IS
+    servicoID INTEGER;
+    total FLOAT;
+BEGIN
+    SELECT id_servico INTO servicoID
+    FROM servico 
+    WHERE tipo = servicoNome;
+    
+    SELECT SUM(sr.quantidade * s.preco) INTO total
+    FROM servico_reserva sr
+    INNER JOIN servico s
+    ON s.id_servico = sr.servico_id
+    WHERE (sr.reserva_id = reservaID) AND (s.id_servico = servicoID);
+
+    RETURN total;  
+END total_servicos;
+
+select total_servicos(1,'Almoço') from dual;
