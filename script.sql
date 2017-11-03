@@ -330,3 +330,41 @@ BEGIN
 END total_servicos;
 
 select total_servicos(1,'Almoço') from dual;
+
+-- Funcao para retornar o numero do quarto reservado por um certo cliente em um certo hotel
+
+DROP FUNCTION dono_quarto();
+
+CREATE OR REPLACE FUNCTION dono_quarto(
+    nomeHotel IN VARCHAR,
+    nomeCliente IN VARCHAR
+)
+RETURN INTEGER
+IS 
+    hotelID INTEGER;
+    clienteID INTEGER;
+    numeroQuarto INTEGER;
+BEGIN
+   
+    SELECT id_cliente INTO clienteID
+    FROM cliente 
+    WHERE nome = nomeCliente;
+
+    SELECT id_hotel INTO hotelID
+    FROM hotel
+    WHERE nome = nomeHotel;
+
+    SELECT q.numero INTO numeroQuarto
+    FROM quarto q
+    INNER JOIN reserva r 
+    ON q.id_quarto = r.id_reserva
+    WHERE q.hotel_id = hotelID AND r.cliente_id = clienteID;
+
+    return numeroQuarto;
+
+END dono_quarto;
+
+-- Execução 
+
+SELECT dono_quarto('Mackenzie','Joao Pedro') FROM DUAL;
+
