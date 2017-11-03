@@ -264,3 +264,37 @@ SELECT * FROM servico_reserva;
 -- Mostrar Sequencias
 
 SELECT * FROM user_sequences;
+
+-- ETAPA 2
+
+-- Procedure para aumentar o preco das reservas que tem contratado um servico especifico de um certo Hotel
+
+CREATE OR REPLACE PROCEDURE aumenta_preco_reservas
+(
+    nomeHotel IN VARCHAR,
+    nomeServico IN VARCHAR,
+    percentual IN INTEGER
+)
+IS
+    hotelID INTEGER;
+    servicoID INTEGER;
+BEGIN
+    SELECT id_hotel INTO hotelID
+    FROM hotel
+    WHERE ( nome = nomeHotel);
+    
+    SELECT id_servico INTO servicoID
+    FROM servico
+    WHERE tipo = nomeServico;
+    
+    UPDATE reserva
+    SET preco = preco * ( 1 + percentual/100 )
+    WHERE id_reserva IN ( SELECT reserva_id FROM servico_reserva
+                          WHERE servico_id = servicoID );
+    
+END aumenta_preco_reservas;
+
+-- Execução 
+-- Aumentar 20 % o peço das reservas do Hotel Mackenzie que tem contratado o serviço limpesa.
+
+execute aumenta_preco_reservas ('Mackenzie','Limpesa',20);
