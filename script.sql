@@ -94,8 +94,8 @@ CREATE TABLE cliente_removido (
     email varchar(20),
     endereco_id integer,
     rg varchar(10),
-    primary key (id_cliente),
-    foreign key (id_cliente) references cliente (id_cliente)
+    data_remocao date,
+    primary key (id_cliente)
 );
 
 
@@ -217,15 +217,19 @@ END;
 INSERT INTO endereco(rua,bairo,cidade,complimento,numero) VALUES('Rua De Consolação','Consolação','São Paulo',null,930);
 INSERT INTO endereco(rua,bairo,cidade,complimento,numero) VALUES('Rua Maria Antonio','Consolação','São Paulo',null,123);
 INSERT INTO endereco(rua,bairo,cidade,complimento,numero) VALUES('Rua Benedito','Jardim Guapira','São Paulo','Casa',154);
+INSERT INTO endereco(rua,bairo,cidade,complimento,numero) VALUES('Rua Verona','Jardim Leonor','São Paulo','Casa',132);
+INSERT INTO endereco(rua,bairo,cidade,complimento,numero) VALUES('Rua Aragão','Mazzei','São Paulo','Casa',84);
 
 -- Hoteis
 
 INSERT INTO hotel(nome,telefone,endereco_id) VALUES('Mackenzie','(11) 12345-1234',1);
+INSERT INTO hotel(nome,telefone,endereco_id) VALUES('SP Resort','(11) 12345-1234',4);
 
 -- Clientes
 
 INSERT INTO cliente(nome,telefone,email,endereco_id,rg) VALUES('Joao Pedro','(11) 12312-1232','joao@hotmail.com',3,'12.123.123-1');
-INSERT INTO cliente(nome,telefone,email,endereco_id,rg) VALUES('Carol Mendes','(11) 12312-1232','carol@hotmail.com',2,'32.142.412-2');
+INSERT INTO cliente(nome,telefone,email,endereco_id,rg) VALUES('Carol Mendes','(11) 53123-5412','carol@hotmail.com',2,'32.142.412-2');
+INSERT INTO cliente(nome,telefone,email,endereco_id,rg) VALUES('Daniela Barbosa','(11) 41231-1532','daniela@hotmail.com',5,'45.123.521-3');
 
 -- Quartos 
 
@@ -234,20 +238,36 @@ INSERT INTO quarto(numero,hotel_id,disponivel) VALUES(201,1,0);
 INSERT INTO quarto(numero,hotel_id,disponivel) VALUES(301,1,0);
 INSERT INTO quarto(numero,hotel_id,disponivel) VALUES(401,1,0);
 
+INSERT INTO quarto(numero,hotel_id,disponivel) VALUES(1000,2,0);
+INSERT INTO quarto(numero,hotel_id,disponivel) VALUES(2000,2,0);
+INSERT INTO quarto(numero,hotel_id,disponivel) VALUES(3000,2,0);
+INSERT INTO quarto(numero,hotel_id,disponivel) VALUES(4000,2,1);
+
+
 -- Serviços
 
 INSERT INTO servico(tipo,preco) VALUES('Limpesa',20);
 INSERT INTO servico(tipo,preco) VALUES('Almoço',100);
 INSERT INTO servico(tipo,preco) VALUES('Janta',150);
 
+INSERT INTO servico(tipo,preco) VALUES('SPA',2000);
+INSERT INTO servico(tipo,preco) VALUES('Sauna',1500);
+INSERT INTO servico(tipo,preco) VALUES('jacuzzi',3000);
+
 -- Reservas
 
 INSERT INTO reserva(cliente_id,quarto_id,data_inicio,data_fim,preco)
     VALUES(1,1,TO_DATE('2017/11/03', 'yyyy/mm/dd'),TO_DATE('2017/11/06', 'yyyy/mm/dd'),320);
 
+INSERT INTO reserva(cliente_id,quarto_id,data_inicio,data_fim,preco)
+    VALUES(3,8,TO_DATE('2017/11/05', 'yyyy/mm/dd'),TO_DATE('2017/11/07', 'yyyy/mm/dd'),1430);
+
 -- Servico_reserva
 
 INSERT INTO servico_reserva(servico_id,reserva_id,quantidade) VALUES(2,1,3);
+
+INSERT INTO servico_reserva(servico_id,reserva_id,quantidade) VALUES(6,2,2);
+INSERT INTO servico_reserva(servico_id,reserva_id,quantidade) VALUES(5,2,3);
 
 
 -- Mostrar Dados
@@ -427,3 +447,41 @@ select * from quarto;
 select * from reserva;
 
 
+-- Trigger para adicionar um cliente removido para a tabela cliente_removido e salvar as reservas removidas dele na tabela reserva_removida como disponibilizr o quarto da reserva dele.
+
+DROP TRIGGER controle_cliente;
+
+CREATE OR REPLACE TRIGGER controle_cliente 
+BEFORE
+DELETE
+ON cliente
+FOR EACH ROW
+DECLARE
+    quartoID INTEGER;
+    dataInicio DATE;
+    dataFim DATE;
+    precoReserva FLOAT;
+BEGIN
+      INSERT INTO cliente_removido ( nome , telefone , email , rg ,endereco_id, data_remocao ) 
+        VALUES(:OLD.nome,:OLD.telefone,:OLD.email,:OLD.rg,:OLD.endereco_id,sysdate);
+        
+    SELECT quarto_id INTO quartoID
+    FROM reserva
+    WHERE cliente_id = :OLD.id_cliente;
+    
+    SELECT data_inicio INTO dataInicio
+    FROM reserva
+    WHERE cliente_id = :OLD.id_cliente;
+    
+    SELECT data_fim INTO dataFim
+    FROM reserva
+    WHERE cliente_id = :OLD.id_cliente;
+    
+    SELECT preco INTO precoReserva
+    FROM reserva
+    WHERE cliente_id = :OLD.id_cliente;
+        
+    INSERT INTO reserva_removida (data_remocao,cliente_id,quarto_id,data_inicio,data_fim,preco)
+        VALUES(sysdate,:OLD.id_cliente,quartoID,dataInicio,dataFim,precoReserva);
+        
+END;    
