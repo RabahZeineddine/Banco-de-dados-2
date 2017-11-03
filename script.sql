@@ -368,3 +368,62 @@ END dono_quarto;
 
 SELECT dono_quarto('Mackenzie','Joao Pedro') FROM DUAL;
 
+
+-- ETAPA 4 Trigger Na Insercao, alteracao ou remocao de reserva
+
+DROP TRIGGER controle_reserva;
+
+CREATE OR REPLACE TRIGGER controle_reserva
+AFTER
+INSERT OR DELETE OR UPDATE OF quarto_id
+ON reserva
+FOR EACH ROW
+BEGIN
+        
+    IF inserting THEN
+        UPDATE quarto
+        SET disponivel = 1
+        WHERE id_quarto = :NEW.quarto_id;
+    ELSIF deleting THEN
+        INSERT INTO reserva_removida (data_remocao,cliente_id,quarto_id,data_inicio,data_fim,preco)
+            VALUES(sysdate,:OLD.cliente_id,:OLD.quarto_id,:OLD.data_inicio,:OLD.data_fim,:OLD.preco);
+        UPDATE quarto
+        SET disponivel = 0
+        WHERE id_quarto = :OLD.quarto_id;
+    ELSIF updating THEN
+        INSERT INTO reserva_alterada (id_reserva,data_alteracao,cliente_id,quarto_id_anterior,quarto_id_atual)
+            VALUES(:OLD.id_reserva,sysdate,:OLD.cliente_id,:OLD.quarto_id,:NEW.quarto_id);
+        UPDATE quarto
+        SET disponivel = 0 
+        WHERE id_quarto = :OLD.quarto_id;
+        UPDATE quarto
+        SET disponivel = 1 
+        WHERE id_quarto = :NEW.quarto_id;
+    END IF;
+END;
+
+-- Adicionar uma reserva e trocar a disponibilidade do quarto pelo o trigger
+select * from quarto;
+INSERT INTO reserva(cliente_id,quarto_id,data_inicio,data_fim,preco)  VALUES(1,2,TO_DATE('2017/11/03', 'yyyy/mm/dd'),TO_DATE('2017/11/06', 'yyyy/mm/dd'),320);
+select * from quarto;
+
+
+
+-- Remover uma reserva, e adicionar a reserva removida para uma nova tabela como tambem trocar a disponibilidade do quarto
+select * from reserva_removida;
+select * from quarto;
+delete from reserva where id_reserva = 2;
+select * from quarto;
+select * from reserva_removida;
+select * from quarto;
+
+
+-- Trocar o quarto de uma reserva, e o trigger ira trocar a disponibilidade do quarto novo como o quarto anterior, e tambem registrar essa alteracao.
+
+select * from quarto;
+select * from reserva;
+update reserva set quarto_id = 3 where id_reserva = 1;
+select * from quarto;
+select * from reserva;
+
+
