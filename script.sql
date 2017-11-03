@@ -144,3 +144,68 @@ CREATE SEQUENCE seq_reserva START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_cliente_removido START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_reserva_removida START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_reserva_alterada START WITH 1 INCREMENT BY 1;
+
+CREATE OR REPLACE trigger BI_ENDERECO
+    BEFORE INSERT ON endereco
+    FOR EACH ROW
+BEGIN
+    SELECT seq_endereco.nextval into :NEW.id_endereco from dual;
+END;
+\
+CREATE OR REPLACE trigger BI_HOTEL
+    BEFORE INSERT ON hotel
+    FOR EACH ROW
+BEGIN
+    SELECT seq_hotel.nextval into :NEW.id_hotel from dual;
+END;
+\
+CREATE OR REPLACE trigger BI_CLIENTE
+    BEFORE INSERT ON cliente
+    FOR EACH ROW
+BEGIN
+    SELECT seq_cliente.nextval into :NEW.id_cliente from dual;
+END;
+\
+CREATE OR REPLACE trigger BI_QUARTO
+    BEFORE INSERT ON quarto
+    FOR EACH ROW
+BEGIN
+    SELECT seq_quarto.nextval into :NEW.id_quarto from dual;
+END;
+\
+CREATE OR REPLACE trigger BI_SERVICO
+    BEFORE INSERT ON servico
+    FOR EACH ROW
+BEGIN
+    SELECT seq_servico.nextval into :NEW.id_servico from dual;
+END;
+\
+CREATE OR REPLACE trigger BI_RESERVA
+    BEFORE INSERT ON reserva
+    FOR EACH ROW
+BEGIN
+    SELECT seq_reserva.nextval into :NEW.id_reserva from dual;
+END;
+\
+CREATE OR REPLACE trigger BI_CLIENTE_REMOVIDO
+    BEFORE INSERT ON cliente_removido
+    FOR EACH ROW
+BEGIN
+    SELECT seq_cliente_removido.nextval into :NEW.id_cliente from dual;
+END;
+\
+CREATE OR REPLACE trigger BI_RESERVA_REMOVIDA
+    BEFORE INSERT ON reserva_removida
+    FOR EACH ROW
+BEGIN
+    SELECT seq_reserva_removida.nextval into :NEW.id_reserva from dual;
+END;
+\
+CREATE OR REPLACE trigger BI_RESERVA_ALTERADA
+    BEFORE INSERT ON reserva_alterada
+    FOR EACH ROW
+BEGIN
+    SELECT seq_reserva_alterada.nextval into :NEW.id_reserva from dual;
+END;
+
+
