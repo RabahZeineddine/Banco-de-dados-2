@@ -125,6 +125,16 @@ CREATE TABLE reserva_alterada (
 
 -- SEQUENCES
 
+DROP SEQUENCE seq_endereco;
+DROP SEQUENCE seq_hotel;
+DROP SEQUENCE seq_cliente;
+DROP SEQUENCE seq_quarto;
+DROP SEQUENCE seq_servico;
+DROP SEQUENCE seq_reserva;
+DROP SEQUENCE seq_cliente_removido;
+DROP SEQUENCE seq_reserva_removida;
+DROP SEQUENCE seq_reserva_alterada;
+
 CREATE SEQUENCE seq_endereco START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_hotel START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_cliente START WITH 1 INCREMENT BY 1;
