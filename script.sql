@@ -74,7 +74,8 @@ CREATE TABLE reserva (
     data_fim date,
     preco float,
     primary key (id_reserva),
-    foreign key (cliente_id) references cliente (id_cliente),
+    foreign key (cliente_id) references cliente (id_cliente)
+    ON DELETE CASCADE ,
     foreign key (quarto_id) references quarto (id_quarto)
 );
 
@@ -84,7 +85,7 @@ CREATE TABLE servico_reserva (
     quantidade INTEGER,
     Primary key(servico_id,reserva_id),
     Foreign key (servico_id) references servico (id_servico),
-    Foreign key (reserva_id) references reserva (id_reserva)
+    Foreign key (reserva_id) references reserva (id_reserva) ON DELETE CASCADE
 );
 
 CREATE TABLE cliente_removido (
@@ -93,7 +94,7 @@ CREATE TABLE cliente_removido (
     telefone varchar(20),
     email varchar(20),
     endereco_id integer,
-    rg varchar(10),
+    rg varchar(20),
     data_remocao date,
     primary key (id_cliente)
 );
@@ -151,56 +152,56 @@ CREATE OR REPLACE trigger BI_ENDERECO
 BEGIN
     SELECT seq_endereco.nextval into :NEW.id_endereco from dual;
 END;
-\
+/
 CREATE OR REPLACE trigger BI_HOTEL
     BEFORE INSERT ON hotel
     FOR EACH ROW
 BEGIN
     SELECT seq_hotel.nextval into :NEW.id_hotel from dual;
 END;
-\
+/
 CREATE OR REPLACE trigger BI_CLIENTE
     BEFORE INSERT ON cliente
     FOR EACH ROW
 BEGIN
     SELECT seq_cliente.nextval into :NEW.id_cliente from dual;
 END;
-\
+/
 CREATE OR REPLACE trigger BI_QUARTO
     BEFORE INSERT ON quarto
     FOR EACH ROW
 BEGIN
     SELECT seq_quarto.nextval into :NEW.id_quarto from dual;
 END;
-\
+/
 CREATE OR REPLACE trigger BI_SERVICO
     BEFORE INSERT ON servico
     FOR EACH ROW
 BEGIN
     SELECT seq_servico.nextval into :NEW.id_servico from dual;
 END;
-\
+/
 CREATE OR REPLACE trigger BI_RESERVA
     BEFORE INSERT ON reserva
     FOR EACH ROW
 BEGIN
     SELECT seq_reserva.nextval into :NEW.id_reserva from dual;
 END;
-\
+/
 CREATE OR REPLACE trigger BI_CLIENTE_REMOVIDO
     BEFORE INSERT ON cliente_removido
     FOR EACH ROW
 BEGIN
     SELECT seq_cliente_removido.nextval into :NEW.id_cliente from dual;
 END;
-\
+/
 CREATE OR REPLACE trigger BI_RESERVA_REMOVIDA
     BEFORE INSERT ON reserva_removida
     FOR EACH ROW
 BEGIN
     SELECT seq_reserva_removida.nextval into :NEW.id_reserva from dual;
 END;
-\
+/
 CREATE OR REPLACE trigger BI_RESERVA_ALTERADA
     BEFORE INSERT ON reserva_alterada
     FOR EACH ROW
@@ -208,7 +209,7 @@ BEGIN
     SELECT seq_reserva_alterada.nextval into :NEW.id_reserva from dual;
 END;
 
-
+/
 -- INSERIR DADOS
 
 
@@ -288,7 +289,7 @@ SELECT * FROM user_sequences;
 -- ETAPA 2
 
 -- Procedure para aumentar o preco das reservas que tem contratado um servico especifico de um certo Hotel
-
+DROP PROCEDURE aumenta_preco_reservas;
 CREATE OR REPLACE PROCEDURE aumenta_preco_reservas
 (
     nomeHotel IN VARCHAR,
@@ -313,11 +314,15 @@ BEGIN
                           WHERE servico_id = servicoID );
     
 END aumenta_preco_reservas;
-
+/
 -- Execução 
--- Aumentar 20 % o peço das reservas do Hotel Mackenzie que tem contratado o serviço limpesa.
+-- Aumentar 20 % o peço das reservas do Hotel Mackenzie que tem contratado o serviço almoço.
 
-execute aumenta_preco_reservas ('Mackenzie','Limpesa',20);
+SELECT * FROM servico;
+SELECT * FROM reserva;
+SELECT * FROM servico_reserva;
+execute aumenta_preco_reservas ('Mackenzie','Almoço',20);
+SELECT * FROM reserva;
 
 
 -- ETAPA 3 
@@ -348,12 +353,14 @@ BEGIN
 
     RETURN total;  
 END total_servicos;
-
-select total_servicos(1,'Almoço') from dual;
+/
+SELECT * FROM servico;
+SELECT * FROM servico_reserva;
+SELECT total_servicos(1,'Almoço') FROM dual;
 
 -- Funcao para retornar o numero do quarto reservado por um certo cliente em um certo hotel
 
-DROP FUNCTION dono_quarto();
+DROP FUNCTION dono_quarto;
 
 CREATE OR REPLACE FUNCTION dono_quarto(
     nomeHotel IN VARCHAR,
@@ -383,7 +390,7 @@ BEGIN
     return numeroQuarto;
 
 END dono_quarto;
-
+/
 -- Execução 
 
 SELECT dono_quarto('Mackenzie','Joao Pedro') FROM DUAL;
@@ -421,33 +428,34 @@ BEGIN
         WHERE id_quarto = :NEW.quarto_id;
     END IF;
 END;
-
+/
 -- Adicionar uma reserva e trocar a disponibilidade do quarto pelo o trigger
-select * from quarto;
+SELECT * FROM quarto;
 INSERT INTO reserva(cliente_id,quarto_id,data_inicio,data_fim,preco)  VALUES(1,2,TO_DATE('2017/11/03', 'yyyy/mm/dd'),TO_DATE('2017/11/06', 'yyyy/mm/dd'),320);
-select * from quarto;
+SELECT * FROM quarto;
 
 
 
 -- Remover uma reserva, e adicionar a reserva removida para uma nova tabela como tambem trocar a disponibilidade do quarto
-select * from reserva_removida;
-select * from quarto;
-delete from reserva where id_reserva = 2;
-select * from quarto;
-select * from reserva_removida;
-select * from quarto;
+SELECT * FROM reserva_removida;
+SELECT * FROM quarto;
+DELETE FROM reserva WHERE id_reserva = 2;
+SELECT * FROM quarto;
+SELECT * FROM reserva_removida;
+SELECT * FROM quarto;
 
 
 -- Trocar o quarto de uma reserva, e o trigger ira trocar a disponibilidade do quarto novo como o quarto anterior, e tambem registrar essa alteracao.
 
-select * from quarto;
-select * from reserva;
-update reserva set quarto_id = 3 where id_reserva = 1;
-select * from quarto;
-select * from reserva;
+SELECT * FROM quarto;
+SELECT * FROM reserva;
+SELECT * FROM reserva_alterada;
+UPDATE reserva SET quarto_id = 3 WHERE id_reserva = 1;
+SELECT * FROM quarto;
+SELECT * FROM reserva;
+SELECT * FROM reserva_alterada;
 
-
--- Trigger para adicionar um cliente removido para a tabela cliente_removido e salvar as reservas removidas dele na tabela reserva_removida como disponibilizr o quarto da reserva dele.
+-- Trigger para adicionar um cliente removido para a tabela cliente_removido.
 
 DROP TRIGGER controle_cliente;
 
@@ -464,24 +472,15 @@ DECLARE
 BEGIN
       INSERT INTO cliente_removido ( nome , telefone , email , rg ,endereco_id, data_remocao ) 
         VALUES(:OLD.nome,:OLD.telefone,:OLD.email,:OLD.rg,:OLD.endereco_id,sysdate);
-        
-    SELECT quarto_id INTO quartoID
-    FROM reserva
-    WHERE cliente_id = :OLD.id_cliente;
-    
-    SELECT data_inicio INTO dataInicio
-    FROM reserva
-    WHERE cliente_id = :OLD.id_cliente;
-    
-    SELECT data_fim INTO dataFim
-    FROM reserva
-    WHERE cliente_id = :OLD.id_cliente;
-    
-    SELECT preco INTO precoReserva
-    FROM reserva
-    WHERE cliente_id = :OLD.id_cliente;
-        
-    INSERT INTO reserva_removida (data_remocao,cliente_id,quarto_id,data_inicio,data_fim,preco)
-        VALUES(sysdate,:OLD.id_cliente,quartoID,dataInicio,dataFim,precoReserva);
-        
+
 END;    
+/
+
+
+SELECT * FROM cliente_removido;
+SELECT * FROM cliente;
+
+DELETE FROM cliente WHERE id_cliente = 1;
+
+SELECT * FROM cliente_removido;
+SELECT * FROM cliente;
